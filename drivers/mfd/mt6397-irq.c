@@ -167,6 +167,7 @@ int mt6397_irq_init(struct mt6397_chip *chip)
 
 	switch (chip->chip_id) {
 	case MT6323_CHIP_ID:
+	case MT6350_CHIP_ID:
 		chip->int_con[0] = MT6323_INT_CON0;
 		chip->int_con[1] = MT6323_INT_CON1;
 		chip->int_status[0] = MT6323_INT_STATUS0;
