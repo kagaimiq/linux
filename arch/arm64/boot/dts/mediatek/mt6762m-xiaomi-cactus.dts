@@ -1,0 +1,214 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/dts-v1/;
+
+#include "mt6762m.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/pinctrl/mt65xx.h>
+
+/ {
+	compatible = "xiaomi,cactus", "mediatek,mt6762m", "mediatek,mt6765";
+	model = "Xiaomi Redmi 6A (cactus) - Mediatek MT6762M";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		bootargs = "\
+g_ether.host_addr=AC:EB:EC:A0:88:90 g_ether.dev_addr=DE:AD:BE:EF:47:77 \
+clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
+		stdout-path = "serial0:921600n8";
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0 0x40000000 0 0x80000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		/* konata's 128 MiB of reserved memory */
+		konata@60000000 {
+			reg = <0 0x60000000 0 0x8000000>;
+		};
+
+		/* various stuff that goes from the preloader & ATF */
+		#if 0
+		atf@47d80000 {
+			reg = <0 0x47d80000 0 0x50000>;
+			no-map;
+		};
+
+		teei@70000000 {
+			reg = <0 0x70000000 0 0x3c40000>;
+			no-map;
+		};
+
+		sspm@7fef0000 {
+			reg = <0 0x7fef0000 0 0xc0000>;
+			no-map;
+		};
+		#endif
+	};
+
+	/* dummy regulators -- needs to be from the MT6357 PMIC node! */
+	reg_vio18: ldo_vio18 {
+		compatible = "regulator-fixed";
+		regulator-name = "vio18";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	reg_vemc3v3: ldo_vemc3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "vemc3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	reg_vmc: ldo_vmc {
+		compatible = "regulator-fixed";
+		regulator-name = "vmc";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	reg_vmch: ldo_vmch {
+		compatible = "regulator-fixed";
+		regulator-name = "vmch";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+};
+
+&pio {
+	pinctrl-0 = <&pio_default>;
+	pinctrl-names = "default";
+
+	mmc0_pins_default: mmc0-0 {
+		cmd-dat-pins {
+			pinmux = <(MTK_PIN_NO(129) | 2)>,
+			         <(MTK_PIN_NO(127) | 2)>,
+			         <(MTK_PIN_NO(126) | 2)>,
+			         <(MTK_PIN_NO(132) | 2)>,
+			         <(MTK_PIN_NO(123) | 2)>,
+			         <(MTK_PIN_NO(125) | 2)>,
+			         <(MTK_PIN_NO(128) | 2)>,
+			         <(MTK_PIN_NO(130) | 2)>,
+			         <(MTK_PIN_NO(122) | 2)>;
+			input-enable;
+			mediatek,pull-up-adv = <1>;
+		};
+		clk-pins {
+			pinmux = <(MTK_PIN_NO(124) | 2)>;
+			mediatek,pull-down-adv = <2>;
+		};
+		rst-pins {
+			pinmux = <(MTK_PIN_NO(133) | 2)>;
+			mediatek,pull-up-adv = <0>;
+		};
+	};
+
+	mmc1_pins_default: mmc1-0 {
+		cmd-dat-pins {
+			pinmux = <(MTK_PIN_NO(32) | 1)>,
+			         <(MTK_PIN_NO(34) | 1)>,
+			         <(MTK_PIN_NO(33) | 1)>,
+			         <(MTK_PIN_NO(31) | 1)>,
+			         <(MTK_PIN_NO(30) | 1)>;
+			input-enable;
+			mediatek,pull-up-adv = <1>;
+		};
+		clk-pins {
+			pinmux = <(MTK_PIN_NO(29) | 1)>;
+			mediatek,pull-down-adv = <2>;
+		};
+
+		/* This also doubles as the card power gate,
+		 * and there is no pullup resistor on the board,
+		 * and so we need to pull it up there
+		 */
+		cd-pins {
+			pinmux = <(MTK_PIN_NO(47) | 0)>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+
+	pio_default: pio-default {
+		/* USB OTG */
+		iddig-pins {
+			pinmux = <(MTK_PIN_NO(41) | 1)>;
+			input-enable;
+			bias-pull-up;
+		};
+
+		/* PMIC Audio */
+		mtkif-mosi-pins {
+			pinmux = <(MTK_PIN_NO(136) | 1)>,
+			         <(MTK_PIN_NO(137) | 1)>,
+			         <(MTK_PIN_NO(138) | 1)>,
+			         <(MTK_PIN_NO(139) | 1)>;
+		};
+		mtkif-miso-pins {
+			pinmux = <(MTK_PIN_NO(140) | 1)>,
+			         <(MTK_PIN_NO(141) | 1)>,
+			         <(MTK_PIN_NO(142) | 1)>,
+			         <(MTK_PIN_NO(143) | 1)>;
+			input-enable;
+		};
+	};
+};
+
+&usb0 {
+	status = "okay";
+	dr_mode = "otg";
+	usb-role-switch;
+
+	connector {
+		compatible = "gpio-usb-b-connector", "usb-b-connector";
+		type = "micro";
+		id-gpios = <&pio 41 GPIO_ACTIVE_HIGH>;
+		/* vbus-supply = <&usb_vbus>; <-- TODO for MT6370 */
+	};
+};
+
+&mmc0 {
+	status = "okay";
+	pinctrl-0 = <&mmc0_pins_default>;
+	pinctrl-1 = <&mmc0_pins_default>;
+	pinctrl-names = "default", "state_uhs";
+	bus-width = <8>;
+	non-removable;
+	cap-mmc-hw-reset;
+	cap-mmc-highspeed;
+	//mmc-ddr-1_8v;
+	//mmc-hs200-1_8v;
+	vmmc-supply = <&reg_vemc3v3>;
+	vqmmc-supply = <&reg_vio18>;
+	max-frequency = <200000000>;
+};
+
+&mmc1 {
+	status = "okay";
+	pinctrl-0 = <&mmc1_pins_default>;
+	pinctrl-1 = <&mmc1_pins_default>;
+	pinctrl-names = "default", "state_uhs";
+	bus-width = <4>;
+	cd-gpios = <&pio 47 GPIO_ACTIVE_HIGH>;
+	disable-wp;
+	cap-sd-highspeed;
+	vmmc-supply = <&reg_vmch>;
+	vqmmc-supply = <&reg_vmc>;
+	max-frequency = <50000000>;
+};
+
+&uart0 {
+	status = "okay";
+};
