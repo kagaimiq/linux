@@ -9,7 +9,7 @@
 / {
 	#address-cells = <2>;
 	#size-cells = <2>;
-	compatible = "mediatek,mt6762m", "medaitek,mt6765";
+	compatible = "mediatek,mt6762m", "mediatek,mt6765";
 	interrupt-parent = <&sysirq>;
 
 	#if 0 /* i don't use the ATF right now ... */
