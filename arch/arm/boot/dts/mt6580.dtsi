@@ -83,7 +83,13 @@
 		clock-output-names = "clk26m";
 	};
 
-	pio: pinctrl@10005000 {
+	soc {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		ranges;
+
+		pio: pinctrl@10005000 {
 			compatible = "mediatek,mt6580-pinctrl";
 			reg = <0x10005000 0x1000>,
 			      <0x10014000 0x1000>,
@@ -105,115 +111,116 @@
 			interrupts = <GIC_SPI 94 IRQ_TYPE_LEVEL_HIGH>;
 		};
 
-	watchdog: watchdog@10007000 {
-		compatible = "mediatek,mt6589-wdt";
-		reg = <0x10007000 0x100>;
-		interrupts = <GIC_SPI 157 IRQ_TYPE_LEVEL_LOW>;
-	};
-
-	timer: timer@10008000 {
-		compatible = "mediatek,mt6580-timer",
-			     "mediatek,mt6577-timer";
-		reg = <0x10008000 0x80>;
-		interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_LOW>;
-		clocks = <&system_clk>, <&rtc_clk>;
-		clock-names = "system-clk", "rtc-clk";
-	};
-
-	pwrap: pwrap@1000f000 {
-		compatible = "mediatek,mt6580-pwrap";
-		reg = <0x1000f000 0x1000>;
-		reg-names = "pwrap";
-		interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_LOW>;
-		clocks = <&clk26m>,
-			 <&clk26m>;
-		clock-names = "wrap", "spi";
-	};
-
-	sysirq: interrupt-controller@10200100 {
-		compatible = "mediatek,mt6580-sysirq",
-			     "mediatek,mt6577-sysirq";
-		interrupt-controller;
-		#interrupt-cells = <3>;
-		interrupt-parent = <&gic>;
-		reg = <0x10200100 0x1c>;
-	};
-
-	gic: interrupt-controller@10211000 {
-		compatible = "arm,cortex-a7-gic";
-		interrupt-controller;
-		#interrupt-cells = <3>;
-		interrupt-parent = <&gic>;
-		reg = <0x10211000 0x1000>,
-		      <0x10212000 0x2000>,
-		      <0x10214000 0x2000>,
-		      <0x10216000 0x2000>;
-	};
-
-	uart0: serial@11005000 {
-		compatible = "mediatek,mt6580-uart",
-			     "mediatek,mt6577-uart";
-		reg = <0x11005000 0x400>;
-		interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_LOW>;
-		clocks = <&uart_clk>;
-		status = "disabled";
-	};
-
-	uart1: serial@11006000 {
-		compatible = "mediatek,mt6580-uart",
-			     "mediatek,mt6577-uart";
-		reg = <0x11006000 0x400>;
-		interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_LOW>;
-		clocks = <&uart_clk>;
-		status = "disabled";
-	};
-
-	usb0: usb@11100000 {
-		compatible = "mediatek,mtk-musb";
-		reg = <0x11100000 0x1000>;
-		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_LOW>;
-		interrupt-names = "mc";
-		clocks = <&clk26m>,
-			 <&clk26m>,
-			 <&usb_clk>;
-		clock-names = "main", "mcu", "univpll";
-		phys = <&u2port PHY_TYPE_USB2>;
-		dr_mode = "peripheral";
-	};
-
-	u2phy: t-phy@11110000 {
-		compatible = "mediatek,mt2701-tphy",
-			     "mediatek,generic-tphy-v1";
-		reg = <0x11110000 0x800>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-		ranges;
-
-		u2port: usb-phy@11110800 {
-			reg = <0x11110800 0x100>;
-			clocks = <&usb_clk>;
-			clock-names = "ref";
-			#phy-cells = <1>;
+		watchdog: watchdog@10007000 {
+			compatible = "mediatek,mt6589-wdt";
+			reg = <0x10007000 0x100>;
+			interrupts = <GIC_SPI 157 IRQ_TYPE_LEVEL_LOW>;
 		};
-	};
 
-	mmc0: msdc@11120000 {
-		compatible = "mediatek,mt8516-mmc";
-		reg = <0x11120000 0x1000>;
-		interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
-		clocks = <&msdc_clk>,
-			 <&msdc_clk>;
-		clock-names = "source", "hclk";
-		status = "disabled";
-	};
+		timer: timer@10008000 {
+			compatible = "mediatek,mt6580-timer",
+				     "mediatek,mt6577-timer";
+			reg = <0x10008000 0x80>;
+			interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&system_clk>, <&rtc_clk>;
+			clock-names = "system-clk", "rtc-clk";
+		};
 
-	mmc1: msdc@11130000 {
-		compatible = "mediatek,mt8516-mmc";
-		reg = <0x11130000 0x1000>;
-		interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-		clocks = <&msdc_clk>,
-			 <&msdc_clk>;
-		clock-names = "source", "hclk";
-		status = "disabled";
+		pwrap: pwrap@1000f000 {
+			compatible = "mediatek,mt6580-pwrap";
+			reg = <0x1000f000 0x1000>;
+			reg-names = "pwrap";
+			interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&clk26m>,
+				 <&clk26m>;
+			clock-names = "wrap", "spi";
+		};
+
+		sysirq: interrupt-controller@10200100 {
+			compatible = "mediatek,mt6580-sysirq",
+				     "mediatek,mt6577-sysirq";
+			reg = <0x10200100 0x1c>;
+			interrupt-controller;
+			#interrupt-cells = <3>;
+			interrupt-parent = <&gic>;
+		};
+
+		gic: interrupt-controller@10211000 {
+			compatible = "arm,cortex-a7-gic";
+			reg = <0x10211000 0x1000>,
+			      <0x10212000 0x2000>,
+			      <0x10214000 0x2000>,
+			      <0x10216000 0x2000>;
+			interrupt-controller;
+			#interrupt-cells = <3>;
+			interrupt-parent = <&gic>;
+		};
+
+		uart0: serial@11005000 {
+			compatible = "mediatek,mt6580-uart",
+				     "mediatek,mt6577-uart";
+			reg = <0x11005000 0x400>;
+			interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&uart_clk>;
+			status = "disabled";
+		};
+
+		uart1: serial@11006000 {
+			compatible = "mediatek,mt6580-uart",
+				     "mediatek,mt6577-uart";
+			reg = <0x11006000 0x400>;
+			interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&uart_clk>;
+			status = "disabled";
+		};
+
+		usb0: usb@11100000 {
+			compatible = "mediatek,mtk-musb";
+			reg = <0x11100000 0x1000>;
+			interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_LOW>;
+			interrupt-names = "mc";
+			clocks = <&clk26m>,
+				 <&clk26m>,
+				 <&usb_clk>;
+			clock-names = "main", "mcu", "univpll";
+			phys = <&u2port PHY_TYPE_USB2>;
+			dr_mode = "peripheral";
+		};
+
+		u2phy: t-phy@11110000 {
+			compatible = "mediatek,mt2701-tphy",
+				     "mediatek,generic-tphy-v1";
+			reg = <0x11110000 0x800>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges;
+
+			u2port: usb-phy@11110800 {
+				reg = <0x11110800 0x100>;
+				clocks = <&usb_clk>;
+				clock-names = "ref";
+				#phy-cells = <1>;
+			};
+		};
+
+		mmc0: msdc@11120000 {
+			compatible = "mediatek,mt8516-mmc";
+			reg = <0x11120000 0x1000>;
+			interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&msdc_clk>,
+				 <&msdc_clk>;
+			clock-names = "source", "hclk";
+			status = "disabled";
+		};
+
+		mmc1: msdc@11130000 {
+			compatible = "mediatek,mt8516-mmc";
+			reg = <0x11130000 0x1000>;
+			interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&msdc_clk>,
+				 <&msdc_clk>;
+			clock-names = "source", "hclk";
+			status = "disabled";
+		};
 	};
 };
