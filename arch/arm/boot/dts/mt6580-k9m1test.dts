@@ -19,7 +19,7 @@
 	chosen {
 		bootargs = "\
 g_ether.host_addr=00:11:22:33:44:55 g_ether.dev_addr=00:01:12:23:34:45 \
-earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
+clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		stdout-path = "serial1:921600n8";
 	};
 
