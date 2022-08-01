@@ -10,7 +10,7 @@
 
 / {
 	compatible = "xiaomi,cactus", "mediatek,mt6762m", "mediatek,mt6765";
-	model = "Xiaomi Redmi 6A (cactus) - Mediatek MT6762M";
+	model = "Xiaomi Redmi 6A (cactus)";
 
 	aliases {
 		serial0 = &uart0;
@@ -38,23 +38,10 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 			reg = <0 0x60000000 0 0x8000000>;
 		};
 
-		/* various stuff that goes from the preloader & ATF */
-		#if 0
-		atf@47d80000 {
-			reg = <0 0x47d80000 0 0x50000>;
-			no-map;
+		/* My special bootloader */
+		konaboot@48000000 {
+			reg = <0 0x48000000 0 0x100000>;
 		};
-
-		teei@70000000 {
-			reg = <0 0x70000000 0 0x3c40000>;
-			no-map;
-		};
-
-		sspm@7fef0000 {
-			reg = <0 0x7fef0000 0 0xc0000>;
-			no-map;
-		};
-		#endif
 	};
 
 	/* dummy regulators -- needs to be from the MT6357 PMIC node! */
@@ -84,6 +71,47 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		regulator-name = "vmch";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
+	};
+
+	/* i2c gpio -- need to make the hw i2c work */
+	i2c0: i2c-gpio-touch {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 82 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 83 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	i2c1: i2c-gpio-sensor {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 81 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 84 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	i2c2: i2c-gpio-maincan {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 104 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 103 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	i2c4: i2c-gpio-subcam {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 106 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 105 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	i2c5: i2c-gpio-pmu {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 49 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 48 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	/* spi gpio --- need to make the hw spi work */
+	spi4: spi-gpio-accel {
+		compatible = "spi-gpio";
+		sck-gpios = <&pio 16 0>;
+		miso-gpios = <&pio 13 0>;
+		mosi-gpios = <&pio 15 0>;
+		cs-gpios = <&pio 14 0>;
+		num-chipselects = <1>;
 	};
 };
 
@@ -129,27 +157,28 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 			pinmux = <(MTK_PIN_NO(29) | 1)>;
 			mediatek,pull-down-adv = <2>;
 		};
-
-		/* This also doubles as the card power gate,
-		 * and there is no pullup resistor on the board,
-		 * and so we need to pull it up there
-		 */
-		cd-pins {
-			pinmux = <(MTK_PIN_NO(47) | 0)>;
-			bias-pull-up;
-			input-enable;
-		};
 	};
 
 	pio_default: pio-default {
-		/* USB OTG */
-		iddig-pins {
-			pinmux = <(MTK_PIN_NO(41) | 1)>;
+		pmu-irq-pins {
+			pinmux = <(MTK_PIN_NO(11) | 0)>;
 			input-enable;
 			bias-pull-up;
 		};
 
-		/* PMIC Audio */
+		usb-id-pins {
+			pinmux = <(MTK_PIN_NO(41) | 0)>; /* 1 for IDDIG */
+			input-enable;
+			bias-pull-up;
+		};
+
+		slot-insert-pins {
+			pinmux = <(MTK_PIN_NO(46) | 0)>, /* SIM2 */
+			         <(MTK_PIN_NO(47) | 0)>; /* SIM1/microSD */
+			input-enable;
+			bias-pull-up;
+		};
+
 		mtkif-mosi-pins {
 			pinmux = <(MTK_PIN_NO(136) | 1)>,
 			         <(MTK_PIN_NO(137) | 1)>,
@@ -164,6 +193,73 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 			input-enable;
 		};
 	};
+};
+
+&i2c0 {
+	status = "okay";
+
+	/* touchscreen (xxx @ 0x38) */
+};
+
+&i2c1 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	magnetometer@c {
+		compatible = "asahi-kasei,ak09918";
+		reg = <0xc>;
+	};
+
+	light-proximity@48 {
+		compatible = "sensortek,stk3321";
+		reg = <0x48>;
+	};
+};
+
+&i2c2 {
+	status = "okay";
+
+	/* main camera */
+};
+
+&i2c4 {
+	status = "okay";
+
+	/* front camera */
+};
+
+&i2c5 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	pmic@34 {
+		compatible = "mediatek,mt6370";
+		reg = <0x34>;
+		interrupts = <&pio 11 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+	};
+
+	/* the 0x4e is for some "type-c" thing */
+};
+
+&spi4 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	accelerometer@0 {
+		compatible = "st,lis3dh-accel";
+		reg = <0>;
+	};
+};
+
+&pwrap {
+	status = "okay";
+
+	/* MT6357 PMIC */
 };
 
 &usb0 {
