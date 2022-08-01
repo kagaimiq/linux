@@ -12,7 +12,7 @@
 	compatible = "mediatek,mt6762m", "mediatek,mt6765";
 	interrupt-parent = <&sysirq>;
 
-	#if 0 /* i don't use the ATF right now ... */
+	#if 0 /* No PSCI */
 	psci {
 		compatible = "arm,psci-0.2";
 		method = "smc";
@@ -173,6 +173,7 @@
 			clocks = <&topckgen CLK_TOP_AXI_SEL>,
 				 <&clk26m>;
 			clock-names = "wrap", "spi";
+			status = "disabled";
 		};
 
 		apmixed: syscon@1000c000 {
@@ -209,6 +210,18 @@
 			clocks = <&infracfg CLK_IFR_UART1>,
 				 <&infracfg CLK_IFR_AP_DMA>;
 			clock-names = "baud", "bus";
+			status = "disabled";
+		};
+
+		btif: serial@1100c000 {
+			compatible = "mediatek,mt6765-btif",
+				     "mediatek,mtk-btif";
+			reg = <0 0x1100c000 0 0x1000>;
+			interrupts = <GIC_SPI 112 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&infracfg CLK_IFR_BTIF>;
+			clock-names = "main";
+			reg-shift = <2>;
+			reg-io-width = <4>;
 			status = "disabled";
 		};
 
