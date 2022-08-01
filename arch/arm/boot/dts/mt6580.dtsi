@@ -174,6 +174,19 @@
 			status = "disabled";
 		};
 
+		btif: serial@1100e000 {
+			compatible = "mediatek,mt6580-btif",
+				     "mediatek,mtk-btif";
+			reg = <0x1100e000 0x1000>;
+			interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_LOW>;
+			//clocks = <&topckgen CLK_TOP_BTIF>; // TODO!!
+			clocks = <&clk26m>; // TODO!!
+			clock-names = "main";
+			reg-shift = <2>;
+			reg-io-width = <4>;
+			status = "disabled";
+		};
+
 		usb0: usb@11100000 {
 			compatible = "mediatek,mtk-musb";
 			reg = <0x11100000 0x1000>;
