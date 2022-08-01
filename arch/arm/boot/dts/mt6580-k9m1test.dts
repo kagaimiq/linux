@@ -9,7 +9,7 @@
 #include <dt-bindings/pinctrl/mt65xx.h>
 
 / {
-	model = "Mediatek MT6580 K9M1-test board";
+	model = "Mediatek MT6580 K9M1-test board (M8-MAINPCB-V9.0.1 from Homtom HT16, don't ask)";
 	compatible = "mizudec,mt6580-k9m1test", "mediatek,mt6580";
 
 	aliases {
@@ -18,7 +18,7 @@
 
 	chosen {
 		bootargs = "\
-g_ether.host_addr=00:11:22:33:44:55 g_ether.dev_addr=00:01:12:23:34:45 \
+g_ether.host_addr=AC:EB:EC:A1:88:90 g_ether.dev_addr=DE:AD:BE:F0:47:77 \
 clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		stdout-path = "serial1:921600n8";
 	};
@@ -38,7 +38,45 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 			reg = <0x88000000 0x8000000>;
 		};
 	};
+
+	/* i2c gpio -- need to make the hw i2c work */
+	i2c0: i2c-gpio-cam {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 61 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 58 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	i2c1: i2c-gpio-touch {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 62 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 59 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
+
+	i2c2: i2c-gpio-sensor {
+		compatible = "i2c-gpio";
+		sda-gpios = <&pio 63 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		scl-gpios = <&pio 60 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+	};
 };
+
+&i2c0 {
+	status = "okay";
+
+	/* camera */
+};
+
+&i2c1 {
+	status = "okay";
+
+	/* touchscreen */
+};
+
+&i2c2 {
+	status = "okay";
+
+	/* sensors */
+};
+
 
 &pio {
 	mmc0_pins_default: mmc0-0 {
@@ -351,6 +389,8 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 				regulator-min-microvolt = <1800000>;
 				regulator-max-microvolt = <1800000>;
 				regulator-enable-ramp-delay = <216>;
+
+				regulator-always-on;
 			};
 		};
 		
