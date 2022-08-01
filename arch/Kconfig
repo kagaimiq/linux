@@ -223,6 +223,9 @@ config HAVE_FUNCTION_DESCRIPTORS
 config TRACE_IRQFLAGS_SUPPORT
 	bool
 
+config TRACE_IRQFLAGS_NMI_SUPPORT
+	bool
+
 #
 # An arch should select this if it provides all these things:
 #
@@ -437,6 +440,13 @@ config MMU_GATHER_PAGE_SIZE
 	bool
 
 config MMU_GATHER_NO_RANGE
+	bool
+	select MMU_GATHER_MERGE_VMAS
+
+config MMU_GATHER_NO_FLUSH_CACHE
+	bool
+
+config MMU_GATHER_MERGE_VMAS
 	bool
 
 config MMU_GATHER_NO_GATHER
