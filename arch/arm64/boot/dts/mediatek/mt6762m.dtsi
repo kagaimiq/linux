@@ -12,7 +12,7 @@
 	compatible = "mediatek,mt6762m", "mediatek,mt6765";
 	interrupt-parent = <&sysirq>;
 
-	#if 0 /* No PSCI */
+	#if 0
 	psci {
 		compatible = "arm,psci-0.2";
 		method = "smc";
@@ -182,6 +182,12 @@
 			#clock-cells = <1>;
 		};
 
+		mcucfg: syscon@10200000 {
+			compatible = "mediatek,mt6765-mcucfg", "syscon";
+			reg = <0 0x10200000 0 0x1000>;
+			#clock-cells = <1>;
+		};
+
 		sysirq: interrupt-controller@10200a80 {
 			compatible = "mediatek,mt6765-sysirq",
 				     "mediatek,mt6577-sysirq";
@@ -189,6 +195,15 @@
 			interrupt-controller;
 			#interrupt-cells = <3>;
 			interrupt-parent = <&gic>;
+		};
+
+		auxadc: adc@11001000 {
+			compatible = "mediatek,mt6765-auxadc";
+			reg = <0 0x11001000 0 0x1000>;
+			clocks = <&infracfg CLK_IFR_AUXADC>;
+			clock-names = "main";
+			#io-channel-cells = <1>;
+			status = "disabled";
 		};
 
 		uart0: serial@11002000 {
