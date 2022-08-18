@@ -34,8 +34,14 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		ranges;
 
 		/* konata's 128 MiB of reserved memory */
+		// Also i put the MTK Log there
 		konata@60000000 {
 			reg = <0 0x60000000 0 0x8000000>;
+		};
+
+		/* the MTK atf (cause i'm looser) */
+		mtk-atf@47d80000 {
+			reg = <0 0x47d80000 0 0x280000>;
 		};
 
 		/* My special bootloader */
@@ -173,8 +179,9 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		};
 
 		slot-insert-pins {
-			pinmux = <(MTK_PIN_NO(46) | 0)>, /* SIM2 */
-			         <(MTK_PIN_NO(47) | 0)>; /* SIM1/microSD */
+			pinmux = <(MTK_PIN_NO(1) | 0)>,  /* MicroSD (+ SIM1) */
+			         <(MTK_PIN_NO(46) | 0)>, /* SIM2 */
+			         <(MTK_PIN_NO(47) | 0)>; /* SIM1 (+ MicroSD) */
 			input-enable;
 			bias-pull-up;
 		};
@@ -297,7 +304,7 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 	pinctrl-1 = <&mmc1_pins_default>;
 	pinctrl-names = "default", "state_uhs";
 	bus-width = <4>;
-	cd-gpios = <&pio 47 GPIO_ACTIVE_HIGH>;
+	cd-gpios = <&pio 1 GPIO_ACTIVE_HIGH>;
 	disable-wp;
 	cap-sd-highspeed;
 	vmmc-supply = <&reg_vmch>;
@@ -306,5 +313,9 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 };
 
 &uart0 {
+	status = "okay";
+};
+
+&auxadc {
 	status = "okay";
 };
