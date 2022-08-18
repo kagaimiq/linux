@@ -7,6 +7,7 @@
 
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/thermal/thermal.h>
 #include <dt-bindings/phy/phy.h>
 
 / {
@@ -24,26 +25,44 @@
 			device_type = "cpu";
 			compatible = "arm,cortex-a7";
 			reg = <0x0>;
+			#cooling-cells = <2>;
 		};
 
 		cpu1: cpu@1 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a7";
 			reg = <0x1>;
+			#cooling-cells = <2>;
 		};
 
 		cpu2: cpu@2 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a7";
 			reg = <0x2>;
+			#cooling-cells = <2>;
 		};
 
 		cpu3: cpu@3 {
 			device_type = "cpu";
 			compatible = "arm,cortex-a7";
 			reg = <0x3>;
+			#cooling-cells = <2>;
 		};
+	};
 
+	thermal-zones {
+		/* coretemp is because most cpu temperature readers
+		 * (or at least the NEOFETCH) use this 
+		 * because IBM PCs with 16-bit 8088 CPU at 4.77 MHz
+		 * and 640k of RAM ad the MDA Texts is BETTER ???
+		 * but sbc-bench expects it to be soc/cpu/etc not the coretemp...
+		 */
+		cpu_thermal: coretemp {
+			polling-delay-passive = <1000>;
+			polling-delay = <1000>;
+
+			thermal-sensors = <&thermal 0>;
+		};
 	};
 
 	system_clk: dummy13m {
@@ -126,6 +145,17 @@
 			clock-names = "system-clk", "rtc-clk";
 		};
 
+		efuse: efuse@10009000 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "mediatek,mt6580-efuse", "mediatek,efuse";
+			reg = <0x10009000 0x1000>;
+
+			thermal_calibration: calib@194 {
+				reg = <0x194 0xc>;
+			};
+		};
+
 		pwrap: pwrap@1000f000 {
 			compatible = "mediatek,mt6580-pwrap";
 			reg = <0x1000f000 0x1000>;
@@ -134,6 +164,12 @@
 			clocks = <&clk26m>,
 				 <&clk26m>;
 			clock-names = "wrap", "spi";
+		};
+
+		apmixedsys: syscon@10018000 {
+			compatible = "mediatek,mt6580-apmixedsys", "syscon";
+			reg = <0x10018000 0x1000>;
+			#clock-cells = <1>;
 		};
 
 		sysirq: interrupt-controller@10200100 {
@@ -156,6 +192,15 @@
 			interrupt-parent = <&gic>;
 		};
 
+		auxadc: adc@11003000 {
+			compatible = "mediatek,mt2701-auxadc";
+			reg = <0x11003000 0x1000>;
+			clocks = <&clk26m>; //<&topckgen CLK_TOP_AUXADC1>;
+			clock-names = "main";
+			#io-channel-cells = <1>;
+			status = "disabled";
+		};
+
 		uart0: serial@11005000 {
 			compatible = "mediatek,mt6580-uart",
 				     "mediatek,mt6577-uart";
@@ -172,6 +217,20 @@
 			interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_LOW>;
 			clocks = <&uart_clk>;
 			status = "disabled";
+		};
+
+		thermal: thermal@1100d000 {
+			compatible = "mediatek,mt2701-thermal";
+			reg = <0x1100d000 0x1000>;
+			interrupts = <GIC_SPI 37 IRQ_TYPE_LEVEL_LOW>;
+			clocks = <&clk26m>, //<&topckgen CLK_TOP_THEM>,
+			         <&clk26m>; //<&topckgen CLK_TOP_AUXADC1>;
+			clock-names = "therm", "auxadc";
+			mediatek,auxadc = <&auxadc>;
+			mediatek,apmixedsys = <&apmixedsys>;
+			#thermal-sensor-cells = <0>;
+			nvmem-cells = <&thermal_calibration>;
+			nvmem-cell-names = "calibration-data";
 		};
 
 		btif: serial@1100e000 {

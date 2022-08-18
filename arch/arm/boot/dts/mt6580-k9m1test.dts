@@ -9,7 +9,7 @@
 #include <dt-bindings/pinctrl/mt65xx.h>
 
 / {
-	model = "Mediatek MT6580 K9M1-test board (M8-MAINPCB-V9.0.1 from Homtom HT16, don't ask)";
+	model = "Mediatek MT6580 k9m1test (M8-MAINPCB-V9.0.1)";
 	compatible = "mizudec,mt6580-k9m1test", "mediatek,mt6580";
 
 	aliases {
@@ -36,6 +36,30 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		/* konata's 128 MiB of reserved memory */
 		konata@88000000 {
 			reg = <0x88000000 0x8000000>;
+		};
+	};
+
+	board_thermistor: thermal-sensor {
+		compatible = "generic-adc-thermal";
+		#thermal-sensor-cells = <0>;
+		io-channels = <&auxadc 0>;
+		io-channel-names = "sensor-channel";
+
+		/* rough guess, assume 56k pullup at 1.8v and 10k@25*C NTC */
+		temperature-lookup-table = <5 868>,
+					   <25 279>,
+					   <50 150>,
+					   <75 103>,
+					   <100 78>,
+					   <125 63>;
+	};
+
+	thermal-zones {
+		board-temp {
+			polling-delay-passive = <1000>;
+			polling-delay = <1000>;
+
+			thermal-sensors = <&board_thermistor>;
 		};
 	};
 
@@ -172,10 +196,10 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 		interrupts = <13 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-controller;
 		#interrupt-cells = <2>;
-		
+
 		regulators {
 			compatible = "mediatek,mt6323-regulator";
-			
+
 			vproc_reg: buck_vproc {
 				regulator-name = "vproc";
 				regulator-min-microvolt = <700000>;
@@ -416,5 +440,9 @@ clk_ignore_unused earlycon console=ttyS0,921600 root=/dev/mmcblk1p2 rootwait";
 };
 
 &uart1 {
+	status = "okay";
+};
+
+&auxadc {
 	status = "okay";
 };
