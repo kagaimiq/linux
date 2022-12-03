@@ -1,0 +1,76 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+
+#include "msd7816.dtsi"
+
+/ {
+	model = "MStar MSD7816 test";
+
+	aliases {
+		serial0 = &piu_uart0;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200 root=/dev/sda2 rootwait";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x4000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		/* 4 megs for the framebuffer (will fit 1920x1080 @ 16bpp) */
+		fb-memory@2100000 {
+			reg = <0x2100000 0x1a0000>;
+		};
+
+		/* ve framebuffer */
+		ve-memory@3200000 {
+			reg = <0x3200000 0x1a0000>;
+		};
+
+		/* leave this for our experiments */
+		tsukasa@3c00000 {
+			reg = <0x3c00000 0x400000>;
+		};
+	};
+
+	framebuffer@2100000 {
+		compatible = "simple-framebuffer";
+		reg = <0x2100000 0x1a0000>;
+		width = <720>;
+		height = <576>;
+		stride = <(720*4)>;
+		format = "x8r8g8b8";
+	};
+};
+
+&miic0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	temp-sensor@4c {
+		compatible = "gmt,g781";
+		reg = <0x4c>;
+		#thermal-sensor-cells = <1>;
+	};
+
+	rtc@68 {
+		compatible = "dallas,ds1340";
+		reg = <0x68>;
+	};
+};
+
+&uhc2 {
+	status = "okay";
+};
+
+&piu_uart0 {
+	status = "okay";
+};

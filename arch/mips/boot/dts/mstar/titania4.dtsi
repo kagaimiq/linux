@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: GPL-2.0
+
+#include "common.dtsi"
+
+/ {
+	compatible = "mstar,titania4";
+};
+
+&cpu {
+	clocks = <&mipspll>;
+	clock-names = "cpu";
+};
+
+&riu {
+	usbc0: usbc@200e00 { // irq 6
+		compatible = "syscon";
+		reg = <0x200e00 0x100>;
+	};
+
+	usbc1: usbc@200f00 { // irq 33
+		compatible = "syscon";
+		reg = <0x200f00 0x100>;
+	};
+
+	uhc1: uhc@201a00 {
+		compatible = "mstar,msc313-ehci", "faraday,fusbh200";
+		reg = <0x201a00 0x200>;
+		interrupts-extended = <&intc_irq 34 IRQ_TYPE_LEVEL_HIGH>;
+		mstar,usbc = <&usbc1>;
+		status = "disabled";
+	};
+
+	jpd@202e00 {
+		compatible = "mstar,msd7816-jpd";
+		reg = <0x202e00 0x200>;
+		interrupts-extended = <&intc_irq 45 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	uhc0: uhc@204800 {
+		compatible = "mstar,msc313-ehci", "faraday,fusbh200";
+		reg = <0x204800 0x200>;
+		interrupts-extended = <&intc_irq 7 IRQ_TYPE_LEVEL_HIGH>;
+		mstar,usbc = <&usbc0>;
+		status = "disabled";
+	};
+
+	utmi0: utmi@207500 {
+		compatible = "syscon";
+		reg = <0x207500 0x100>;
+	};
+
+	utmi1: utmi@207400 {
+		compatible = "syscon";
+		reg = <0x207400 0x100>;
+	};
+
+	mipspll: mipspll@221800 {
+		compatible = "mstar,msd7816-mipspll";
+		reg = <0x221800 0x200>;
+		clocks = <&xtal_div2>;
+		#clock-cells = <0>;
+	};
+};

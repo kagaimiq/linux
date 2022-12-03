@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+
+#include "msd309px.dtsi"
+
+/ {
+	model = "MStar MSD309PX test";
+
+	aliases {
+		serial0 = &piu_uart0;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200 root=/dev/sda2 rootwait";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x4000000>;
+	};
+
+	#if 0
+	memory@40000000 {
+		device_type = "memory";
+		reg = <0x40000000 0x4000000>;
+	};
+	#endif
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		/* 2 megs for the framebuffer (will fit 1366x768 @ 16bpp) */
+		fb-memory@3a00000 {
+			reg = <0x3a00000 0x210000>;
+		};
+	};
+
+	framebuffer@3a00000 {
+		compatible = "simple-framebuffer";
+		reg = <0x3a00000 0x210000>;
+		width = <1280>;
+		height = <800>;
+		stride = <(1280*2)>;
+		format = "r5g6b5";
+	};
+};
+
+&uhc1 {
+	status = "okay";
+};
+
+&piu_uart0 {
+	status = "okay";
+};

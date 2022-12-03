@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+
+#include "msd7818.dtsi"
+
+/ {
+	model = "MStar MSD7818 test";
+
+	aliases {
+		serial0 = &piu_uart0;
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200 root=/dev/sda2 rootwait";
+	};
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x4000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		/* 4 megs for the framebuffer (will fit 1920x1080 @ 16bpp) */
+		fb-memory@2100000 {
+			reg = <0x2100000 0x400000>;
+		};
+
+		/* ve framebuffer */
+		ve-memory@3200000 {
+			reg = <0x3200000 0x1a0000>;
+		};
+	};
+
+	framebuffer@2100000 {
+		compatible = "simple-framebuffer";
+		reg = <0x2100000 0x400000>;
+		width = <1920>;
+		height = <1080>;
+		stride = <(1920*2)>;
+		format = "r5g6b5";
+	};
+};
+
+&uhc2 {
+	status = "okay";
+};
+
+&piu_uart0 {
+	status = "okay";
+};

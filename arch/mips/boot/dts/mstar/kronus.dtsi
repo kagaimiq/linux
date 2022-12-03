@@ -1,0 +1,80 @@
+// SPDX-License-Identifier: GPL-2.0
+
+#include "common.dtsi"
+
+/ {
+	compatible = "mstar,kronus";
+};
+
+&cpu {
+	clocks = <&mipspll>;
+	clock-names = "cpu";
+};
+
+&riu {
+	jpd@202e00 {
+		compatible = "mstar,msd7816-jpd";
+		reg = <0x202e00 0x200>;
+		interrupts-extended = <&intc_irq 45 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	utmi2: utmi@205400 {
+		compatible = "syscon";
+		reg = <0x205400 0x100>;
+	};
+
+	miic0: miic@206800 {
+		compatible = "mstar,msd7816-miic";
+		reg = <0x206800 0x40>;
+		interrupts-extended = <&intc_irq 22 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&mpll_24m>; // TODO, clkgen2! => 24 MHz
+	};
+
+	miic1: miic@206840 {
+		compatible = "mstar,msd7816-miic";
+		reg = <0x206840 0x40>;
+		interrupts-extended = <&intc_irq 1 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&mpll_24m>; // TODO, clkgen2! => 24 MHz
+	};
+
+	ve@207600 {
+		compatible = "mstar,msd7816-ve";
+		reg = <0x207600 0x200>,
+		      <0x207c00 0x400>;
+		reg-names = "source", "encoder";
+		interrupts-extended = <&intc_irq 17 IRQ_TYPE_LEVEL_HIGH>, // maybe
+				      <&intc_fiq 21 IRQ_TYPE_EDGE_RISING>,
+				      <&intc_fiq 22 IRQ_TYPE_EDGE_RISING>,
+				      <&intc_fiq 24 IRQ_TYPE_EDGE_RISING>;
+		interrupt-names = "ve", "vsync", "field", "tt-done";
+		clocks = <&mpll_27m>, <&xtal>, <&xtal>; // TODO, clkgen!
+		clock-names = "ve", "vein", "vedac";
+	};
+
+	usbc2: usbc@220400 { // irq 13
+		compatible = "syscon";
+		reg = <0x220400 0x100>;
+	};
+
+	uhc2: uhc@220600 {
+		compatible = "mstar,msc313-ehci", "faraday,fusbh200";
+		reg = <0x220600 0x200>;
+		interrupts-extended = <&intc_irq 15 IRQ_TYPE_LEVEL_HIGH>;
+		mstar,usbc = <&usbc2>;
+		status = "disabled";
+	};
+
+	mipspll: mipspll@221800 {
+		compatible = "mstar,msd7816-mipspll";
+		reg = <0x221800 0x200>;
+		clocks = <&xtal>;
+		#clock-cells = <0>;
+	};
+
+	dmpll: mpll@225000 {
+		compatible = "mstar,msd7816-mpll";
+		reg = <0x225000 0x200>;
+		clocks = <&xtal_div2>;
+		#clock-cells = <1>;
+	};
+};
